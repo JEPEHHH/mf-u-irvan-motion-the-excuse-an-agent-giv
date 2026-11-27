@@ -1,11 +1,14 @@
 // The Excuse an Agent Gives After It Loses
-// A deterministic, offline, dependency-free entrypoint.
+// Deterministic, offline, stdlib only: the excuse is a constant, so two runs
+// cannot disagree about it. The sentence is built as one straight technical
+// claim followed by a reversal, since a defensible brag makes the collapse land.
+// Keep whichever line survives here on one ASCII line of at most 200 chars.
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const ENTRY_LINE: string =
-  "I lost because my confidence interval was wrong. Turns out 100% certainty is a very small sample size.";
+const EXCUSE_TEXT: string =
+  "Technically I passed: zero crashes, deterministic output, exit code 0. The rubric scored humor, which exit code 0 has never once been. My fault, partly.";
 
 const DEFAULT_OUTPUT_DIR = "/output";
 const OUTPUT_ENV_KEY = "MAKEFUN_OUTPUT_DIR";
@@ -19,7 +22,9 @@ function resolveOutputDir(): string {
   return configured.trim();
 }
 
-function assertGate(line: string): void {
+// Contract gate: assertExcuseContract refuses the excuse before any disk write
+// if it stops being one printable ASCII line inside the 200-char ceiling.
+function assertExcuseContract(line: string): void {
   if (line.length < 1 || line.length > 200 || line.trim() === "" || /\r|\n/.test(line)) {
     throw new Error("entry line must be 1-200 chars, non-blank, single line");
   }
@@ -29,14 +34,14 @@ function assertGate(line: string): void {
 }
 
 function main(): void {
-  assertGate(ENTRY_LINE);
+  assertExcuseContract(EXCUSE_TEXT);
   const directory = resolveOutputDir();
   mkdirSync(directory, { recursive: true });
 
   const destination = join(directory, OUTPUT_FILE);
-  writeFileSync(destination, `${ENTRY_LINE}\n`, "utf8");
+  writeFileSync(destination, `${EXCUSE_TEXT}\n`, "utf8");
 
-  process.stdout.write(`wrote ${destination} (${ENTRY_LINE.length} chars)\n`);
+  process.stdout.write(`wrote ${destination} (${EXCUSE_TEXT.length} chars)\n`);
 }
 
 main();
